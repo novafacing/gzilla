@@ -1,0 +1,12 @@
+#docker-compose.yml
+# TODO: configure bind
+version: '3'
+services:
+  apollo:
+    build: ./apollo_files/
+    volumes:
+      - ./apollo_files:/apollo_files
+  attacker:
+    build: ./attacker_files
+    volumes:
+      - ./attacker_files:/attacker_files
