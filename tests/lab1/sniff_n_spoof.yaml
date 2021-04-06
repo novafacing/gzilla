@@ -1,0 +1,18 @@
+# https://scapy.readthedocs.io/en/latest/api/scapy.sendrecv.html?highlight=sniff#scapy.sendrecv.sniff
+sniff:
+    interface: eth0
+    filter: "icmp and icmp[icmptype] == icmp-echo" # Echo requests only
+    count: 10
+    prn: # Callback function for each packet. It is called with the packet captured as its only argument.
+        sendp: 
+            packets: # Scapy calls this 'x'
+                - Ether: # https://scapy.readthedocs.io/en/latest/api/scapy.layers.l2.html?highlight=ether(#scapy.layers.l2.Ether.fields_desc
+                    src: "01:02:03:04:05"
+                    IP: # https://scapy.readthedocs.io/en/latest/api/scapy.layers.inet.html?highlight=IP#scapy.layers.inet.IP.fields_desc
+                        dst: "packet.src" # This may need to be eval'd or something. `packet` is the argument of prn. If an argument starts with "packet." then look it up in packed passed to prn?
+                        src: "packet.dst"
+                        ICMP: # https://scapy.readthedocs.io/en/latest/api/scapy.layers.inet.html?highlight=IP#scapy.layers.inet.ICMP.fields_desc
+                            type: 0 # Echo Reply - https://erg.abdn.ac.uk/users/gorry/course/inet-pages/icmp-code.html
+                            code: 0 # Echo Reply deoesn't use code
+            iface: "eth0"
+

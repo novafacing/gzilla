@@ -1,0 +1,12 @@
+sendp: # https://scapy.readthedocs.io/en/latest/api/scapy.sendrecv.html?highlight=sniff#scapy.sendrecv.sendp
+    packets: # Scapy calls this 'x'
+        - Ether: # https://scapy.readthedocs.io/en/latest/api/scapy.layers.l2.html?highlight=ether(#scapy.layers.l2.Ether.fields_desc
+            src: "01:02:03:04:05"
+            IP: # https://scapy.readthedocs.io/en/latest/api/scapy.layers.inet.html?highlight=IP#scapy.layers.inet.IP.fields_desc
+                dst: "1.1.1.1"
+                src: "192.168.15.8"
+                ICMP: # https://scapy.readthedocs.io/en/latest/api/scapy.layers.inet.html?highlight=IP#scapy.layers.inet.ICMP.fields_desc
+                    type: 8 # Echo Request - https://erg.abdn.ac.uk/users/gorry/course/inet-pages/icmp-code.html
+                    code: 0 # Echo request doesn't use code
+    iface: "eth0"
+
