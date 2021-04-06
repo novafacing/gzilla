@@ -1,6 +1,7 @@
 # https://scapy.readthedocs.io/en/latest/api/scapy.sendrecv.html?highlight=sniff#scapy.sendrecv.sniff
 sniff:
-    interface: eth0
-    filter: "tcp and portrange 50-100"
+    iface: "ens33"
+    filter: "tcp and portrange 1300-1400"
     count: 10
     quiet: False
+    # prn: "python:print" # Callback function for each packet. It is called with the packet captured as its only argument.
