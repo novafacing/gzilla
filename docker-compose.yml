@@ -7,6 +7,6 @@ services:
     volumes:
       - ./apollo_files:/apollo_files
   attacker:
-    build: ./attacker_files
+    build: ./
     volumes:
       - ./attacker_files:/attacker_files

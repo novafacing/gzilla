@@ -1,0 +1,14 @@
+// /etc/bind/example.edu.db
+$TTL 3D
+@       IN      SOA     ns.example.edu. admin.example.edu. (
+        2008111001
+        8H
+        2H
+        4W
+        1D)
+@       IN      NS      ns.dnslabattacker.net.
+@       IN      MX      10 mail.example.edu.
+www     IN      A       1.1.1.1
+mail    IN      A       1.1.1.2
+*.example.edu. IN A     1.1.1.100
+
