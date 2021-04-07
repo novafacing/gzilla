@@ -9,5 +9,3 @@ sendp: # https://scapy.readthedocs.io/en/latest/api/scapy.sendrecv.html?highligh
                   qtype: 1 # A
                   qclass: 1 # IN
     iface: "eth0"
-
-

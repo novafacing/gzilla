@@ -1,6 +1,6 @@
 import yaml
 import inspect
-import scapy.all as scapy_all  # type: ignore
+import scapy.all as scapy_all
 from typing import Callable, Dict, Any, List, Set
 
 # https://stackoverflow.com/questions/196960/can-you-list-the-keyword-arguments-a-function-receives

@@ -7,4 +7,3 @@ send: # https://scapy.readthedocs.io/en/latest/api/scapy.sendrecv.html?highlight
                 type: 8 # Echo Request - https://erg.abdn.ac.uk/users/gorry/course/inet-pages/icmp-code.html
                 code: 0 # Echo request doesn't use code
     iface: "eth0"
-

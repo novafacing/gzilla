@@ -28,4 +28,3 @@ sendp: # https://scapy.readthedocs.io/en/latest/api/scapy.sendrecv.html?highligh
                   rclass: 1
                   rdata: "192.168.15.5" # Attacker controlled dns
     iface: "eth0"
-
