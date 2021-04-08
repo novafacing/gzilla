@@ -6,7 +6,20 @@ services:
     build: ./apollo_files/
     volumes:
       - ./apollo_files:/apollo_files
+    networks:
+      local_net:
+        ipv4_address: 172.22.0.4
   attacker:
     build: ./
     volumes:
       - ./attacker_files:/attacker_files
+    networks:
+      local_net:
+        ipv4_address: 172.22.0.5
+networks:
+  local_net:
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.22.0.0/16
+

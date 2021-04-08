@@ -1,4 +1,3 @@
-// /etc/bind/example.edu.db
 $TTL 3D
 @       IN      SOA     ns.example.edu. admin.example.edu. (
         2008111001
