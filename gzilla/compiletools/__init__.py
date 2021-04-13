@@ -41,7 +41,7 @@ def callYamlMethod(method: Callable[..., Any], argdict: Dict[str, Any]) -> Any:
 
 
 def parse_args(
-    args: Dict[str, Any], python_locals: Optional[Dict[str, Any]] = None
+    args: Dict[str, Any], packet_arg: Optional[Any] = None
 ) -> Dict[str, Any]:
     """
     This modifies `args`.
@@ -59,10 +59,16 @@ def parse_args(
     for key, value in args.items():
         print("parsing {}, {}".format(key, value))
         if isinstance(value, str) and value.startswith("python:"):
-            print(python_locals)
-            args[key] = eval(
-                value[7:], globals(), python_locals
-            )  # TODO: Is there a better way
+            args[key] = eval(value[7:])  # TODO: Is there a better way
+        if isinstance(value, str) and value.startswith("packet:"):
+            if packet_arg is None:
+                raise Exception("Packet doesn't exist.")
+            _, x, y = value.split(":")
+            if x not in ["Ether", "IP", "ICMP", "Raw"]:
+                raise Exception("Part doesn't exist.")
+            # TODO: try-catch
+            args[key] = getattr(packet_arg[getScapyMethod(x)], y)
+
         elif isinstance(value, dict):  # lambda call each key in function
             if key == "prn":
                 # callback function on each packet
@@ -70,23 +76,20 @@ def parse_args(
 
                 def prn(packet: Any) -> None:
                     print(dir(packet))
-                    p_locals = copy(python_locals) if python_locals else {}
-                    p_locals.update({"packet": packet})
                     for key in methodObject.keys():
                         if key == "send":
                             method = getScapyMethod(key)
                             method(
                                 **parse_args(
-                                    deepcopy(methodObject[key]), python_locals=p_locals
+                                    deepcopy(methodObject[key]), packet_arg=packet
                                 )
                             )
                         elif key == "sendp":
                             method = getScapyMethod(key)
-                            print(methodObject[key])
-                            # TODO: Make deepcopy not required - bug elsewhere modifeis it
+                            # TODO: Make deepcopy not required - bug elsewhere modifies it
                             method(
                                 **parse_args(
-                                    deepcopy(methodObject[key]), python_locals=p_locals
+                                    deepcopy(methodObject[key]), packet_arg=packet
                                 )
                             )
                         else:
@@ -122,11 +125,11 @@ def parse_args(
 
                         if packet is None:
                             packet = getScapyMethod(match)(
-                                **parse_args(copiedObject, python_locals=python_locals)
+                                **parse_args(copiedObject, packet_arg=packet_arg)
                             )
                         else:
                             packet /= getScapyMethod(match)(
-                                **parse_args(copiedObject, python_locals=python_locals)
+                                **parse_args(copiedObject, packet_arg=packet_arg)
                             )
 
                         packetObject = packetObject[match]

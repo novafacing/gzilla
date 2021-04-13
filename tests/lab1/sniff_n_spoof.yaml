@@ -9,14 +9,14 @@ sniff:
                 - Ether: # https://scapy.readthedocs.io/en/latest/api/scapy.layers.l2.html?highlight=ether(#scapy.layers.l2.Ether.fields_desc
                     src: "01:02:03:04:05"
                     IP: # https://scapy.readthedocs.io/en/latest/api/scapy.layers.inet.html?highlight=IP#scapy.layers.inet.IP.fields_desc
-                        dst: "python:packet[scapy_all.IP].src" # This may need to be eval'd or something. `packet` is the argument of prn. Perhaps if an argument starts with "python:" then eval it? Or perhaps this can be done better with a yaml feature.
-                        src: "python:packet[scapy_all.IP].dst"
+                        dst: "packet:IP:src"
+                        src: "packet:IP:dst"
                         flags: 2 # DF don't fragment
                         ICMP: # https://scapy.readthedocs.io/en/latest/api/scapy.layers.inet.html?highlight=IP#scapy.layers.inet.ICMP.fields_desc
                             type: 0 # Echo Reply - https://erg.abdn.ac.uk/users/gorry/course/inet-pages/icmp-code.html
                             code: 0 # Echo Reply deoesn't use code
-                            id: "python:packet[scapy_all.ICMP].id" # This may need to be eval'd or something. `packet` is the argument of prn. Perhaps if an argument starts with "python:" then eval it? Or perhaps this can be done better with a yaml feature.
-                            seq: "python:packet[scapy_all.ICMP].seq"
+                            id: "packet:ICMP:id"
+                            seq: "packet:ICMP:seq"
                             Raw:
-                                load: "python:packet[scapy_all.Raw].load"
+                                load: "packet:Raw:load"
             iface: "ens33"
