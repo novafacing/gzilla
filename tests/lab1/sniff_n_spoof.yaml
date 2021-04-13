@@ -1,6 +1,6 @@
 # https://scapy.readthedocs.io/en/latest/api/scapy.sendrecv.html?highlight=sniff#scapy.sendrecv.sniff
 sniff:
-    interface: eth0
+    interface: ens33
     filter: "icmp and icmp[icmptype] == icmp-echo" # Echo requests only
     count: 10
     prn: # Callback function for each packet. It is called with the packet captured as its only argument.
@@ -9,9 +9,14 @@ sniff:
                 - Ether: # https://scapy.readthedocs.io/en/latest/api/scapy.layers.l2.html?highlight=ether(#scapy.layers.l2.Ether.fields_desc
                     src: "01:02:03:04:05"
                     IP: # https://scapy.readthedocs.io/en/latest/api/scapy.layers.inet.html?highlight=IP#scapy.layers.inet.IP.fields_desc
-                        dst: "python:packet.src" # This may need to be eval'd or something. `packet` is the argument of prn. Perhaps if an argument starts with "python:" then eval it? Or perhaps this can be done better with a yaml feature.
-                        src: "python:packet.dst"
+                        dst: "python:packet[scapy_all.IP].src" # This may need to be eval'd or something. `packet` is the argument of prn. Perhaps if an argument starts with "python:" then eval it? Or perhaps this can be done better with a yaml feature.
+                        src: "python:packet[scapy_all.IP].dst"
+                        flags: 2 # DF don't fragment
                         ICMP: # https://scapy.readthedocs.io/en/latest/api/scapy.layers.inet.html?highlight=IP#scapy.layers.inet.ICMP.fields_desc
                             type: 0 # Echo Reply - https://erg.abdn.ac.uk/users/gorry/course/inet-pages/icmp-code.html
                             code: 0 # Echo Reply deoesn't use code
-            iface: "eth0"
+                            id: "python:packet[scapy_all.ICMP].id" # This may need to be eval'd or something. `packet` is the argument of prn. Perhaps if an argument starts with "python:" then eval it? Or perhaps this can be done better with a yaml feature.
+                            seq: "python:packet[scapy_all.ICMP].seq"
+                            Raw:
+                                load: "python:packet[scapy_all.Raw].load"
+            iface: "ens33"

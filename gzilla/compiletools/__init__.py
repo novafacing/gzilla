@@ -1,8 +1,8 @@
 import yaml
 import inspect
 import scapy.all as scapy_all
-from typing import Callable, Dict, Any, List, Set
-from copy import deepcopy
+from typing import Callable, Dict, Any, List, Set, Optional
+from copy import deepcopy, copy
 
 # https://stackoverflow.com/questions/196960/can-you-list-the-keyword-arguments-a-function-receives
 def getRequiredArgs(func: Callable[..., Any]) -> List[str]:
@@ -40,34 +40,55 @@ def callYamlMethod(method: Callable[..., Any], argdict: Dict[str, Any]) -> Any:
     return method(**parse_args(argdict))
 
 
-def parse_args(args: Dict[str, Any]) -> Dict[str, Any]:
+def parse_args(
+    args: Dict[str, Any], python_locals: Optional[Dict[str, Any]] = None
+) -> Dict[str, Any]:
     """
     This modifies `args`.
     """
+    # TODO: Are there any aliases that depend on the function called?
+    aliases = {"packets": "x", "interface": "iface"}
 
-    while "packets" in args:
-        # packets is an alias for 'x' in 'send' and 'sendp'
-        args["x"] = args.pop("packets")
+    for key, value in aliases.items():
+        while key in args:
+            # packets is an alias for 'x' in 'send' and 'sendp'
+            args[value] = args.pop(key)
 
     print("in parse_args with {}".format(args))
 
     for key, value in args.items():
         print("parsing {}, {}".format(key, value))
         if isinstance(value, str) and value.startswith("python:"):
-            args[key] = eval(value[7:])  # TODO: Is there a better way
+            print(python_locals)
+            args[key] = eval(
+                value[7:], globals(), python_locals
+            )  # TODO: Is there a better way
         elif isinstance(value, dict):  # lambda call each key in function
             if key == "prn":
                 # callback function on each packet
                 methodObject = args[key]  # Error Handling?
 
                 def prn(packet: Any) -> None:
+                    print(dir(packet))
+                    p_locals = copy(python_locals) if python_locals else {}
+                    p_locals.update({"packet": packet})
                     for key in methodObject.keys():
                         if key == "send":
                             method = getScapyMethod(key)
-                            method(x=[packet], **parse_args(methodObject[key]))
+                            method(
+                                **parse_args(
+                                    deepcopy(methodObject[key]), python_locals=p_locals
+                                )
+                            )
                         elif key == "sendp":
                             method = getScapyMethod(key)
-                            method(x=[packet], **parse_args(methodObject[key]))
+                            print(methodObject[key])
+                            # TODO: Make deepcopy not required - bug elsewhere modifeis it
+                            method(
+                                **parse_args(
+                                    deepcopy(methodObject[key]), python_locals=p_locals
+                                )
+                            )
                         else:
                             raise Exception(
                                 "Invalid Scapy Function for prn. TODO: Narrow Exception Name"
@@ -79,9 +100,10 @@ def parse_args(args: Dict[str, Any]) -> Dict[str, Any]:
                     "Invalid Function Call Argument. TODO: Narrow Exception Type"
                 )
 
-            args[key] = lambda *args, **kwargs: getattr(scapy_all, value[key])(
-                *args, **kwargs
-            )
+                # args[key] = lambda *args, **kwargs: getattr(scapy_all, value[key])(
+                #    *args, **kwargs
+                # )
+
         elif isinstance(value, list):  # Parse each element in the list
             if key == "x":
                 packets = []
@@ -89,18 +111,23 @@ def parse_args(args: Dict[str, Any]) -> Dict[str, Any]:
                     packet = None
 
                     for match in (
-                        x for x in ["Ether", "IP", "ICMP"] if x in packetObject
+                        x for x in ["Ether", "IP", "ICMP", "Raw"] if x in packetObject
                     ):
+                        print(match)
                         copiedObject = {
                             k: packetObject[match][k]
                             for k in packetObject[match].keys()
-                            if k not in ["Ether", "IP", "ICMP"]
+                            if k not in ["Ether", "IP", "ICMP", "Raw"]
                         }
 
                         if packet is None:
-                            packet = getScapyMethod(match)(**parse_args(copiedObject))
+                            packet = getScapyMethod(match)(
+                                **parse_args(copiedObject, python_locals=python_locals)
+                            )
                         else:
-                            packet /= getScapyMethod(match)(**parse_args(copiedObject))
+                            packet /= getScapyMethod(match)(
+                                **parse_args(copiedObject, python_locals=python_locals)
+                            )
 
                         packetObject = packetObject[match]
 
