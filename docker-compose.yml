@@ -1,18 +1,25 @@
 #docker-compose.yml
-# TODO: configure bind
 version: '3'
 services:
   apollo:
-    build: ./apollo_files/
+    build:
+        context: ./docker_files
+        dockerfile: ./apollo_files/Dockerfile
     volumes:
-      - ./apollo_files:/apollo_files
+      - ./gzilla:/gzilla
+    tty: true
+    stdin_open: true
     networks:
       local_net:
         ipv4_address: 172.22.0.4
   attacker:
-    build: ./
+    build:
+        context: ./docker_files
+        dockerfile: ./attacker_files/Dockerfile
     volumes:
-      - ./attacker_files:/attacker_files
+      - ./gzilla:/gzilla
+    tty: true
+    stdin_open: true
     networks:
       local_net:
         ipv4_address: 172.22.0.5

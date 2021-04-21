@@ -1,0 +1,6 @@
+pyyaml
+scapy
+
+black
+mypy
+pre-commit
