@@ -1,11 +1,14 @@
-sendp: # https://scapy.readthedocs.io/en/latest/api/scapy.sendrecv.html?highlight=sniff#scapy.sendrecv.sendp
+send: # https://scapy.readthedocs.io/en/latest/api/scapy.sendrecv.html?highlight=sniff#scapy.sendrecv.send
     packets: # Scapy calls this 'x'
         - IP: # https://scapy.readthedocs.io/en/latest/api/scapy.layers.inet.html?highlight=IP#scapy.layers.inet.IP.fields_desc
               dst: "192.168.15.4" # Apollo / victim dns server
-              DNS: # https://scapy.readthedocs.io/en/latest/api/scapy.layers.dns.html#scapy.layers.dns.DNS
-                qdcount: 1
-                qd:
-                  qname: "xxxxx.example.edu" # https://scapy.readthedocs.io/en/latest/api/scapy.layers.dns.html#scapy.layers.dns.DNSQR
-                  qtype: 1 # A
-                  qclass: 1 # IN
+              UDP: # https://scapy.readthedocs.io/en/latest/api/scapy.layers.inet.html?highlight=IP#scapy.layers.inet.UDP
+                sport: 33333 # Source port 33333 / TODO: random over reserved
+                dport: 53 # 53 is port for dns
+                DNS: # https://scapy.readthedocs.io/en/latest/api/scapy.layers.dns.html#scapy.layers.dns.DNS
+                  qdcount: 1
+                  qd:
+                    qname: "xxxxx.example.edu" # https://scapy.readthedocs.io/en/latest/api/scapy.layers.dns.html#scapy.layers.dns.DNSQR
+                    qtype: 1 # A
+                    qclass: 1 # IN
     iface: "eth0"
