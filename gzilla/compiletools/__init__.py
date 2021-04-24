@@ -100,6 +100,8 @@ def parse_args(
                 args[key] = prn
             elif key == "qd":  # DNSQR
                 args[key] = scapy_all.DNSQR(**parse_args(value, packet_arg=packet_arg))
+            elif key in ["an", "ns", "ar"]:  # DNSQR
+                args[key] = scapy_all.DNSRR(**parse_args(value, packet_arg=packet_arg))
             else:
                 raise Exception(
                     "Invalid Function Call Argument. TODO: Narrow Exception Type"
