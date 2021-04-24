@@ -29,6 +29,7 @@ COPY ./docker_files/attacker_files/named.conf.local /etc/bind/named.conf.local
 COPY ./docker_files/attacker_files/resolv.conf /etc/resolv.conf
 COPY ./tests/ /tests
 COPY ./gzilla/ /gzilla
+ENV PYTHONPATH /gzilla:$PYTHONPATH
 
 COPY ./docker_files/init.sh /init.sh
 

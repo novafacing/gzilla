@@ -4,3 +4,4 @@ scapy
 black
 mypy
 pre-commit
+pytest

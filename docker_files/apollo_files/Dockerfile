@@ -28,6 +28,7 @@ COPY ./docker_files/apollo_files/named.conf.default-zones /etc/bind/named.conf.d
 COPY ./docker_files/apollo_files/db.attacker /etc/bind/db.attacker
 COPY ./tests/ /tests
 COPY ./gzilla/ /gzilla
+ENV PYTHONPATH /gzilla:$PYTHONPATH
 
 COPY ./docker_files/init.sh .
 

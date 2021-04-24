@@ -8,3 +8,6 @@ A visual packet spoofing tool
 ### Running
 - `docker-compose run attacker`
 - `docker-compose run apollo`
+
+### Testing
+- `pytest /tests -v --disable-pytest-warnings`
