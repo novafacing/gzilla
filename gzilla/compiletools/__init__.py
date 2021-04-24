@@ -64,7 +64,7 @@ def parse_args(
             if packet_arg is None:
                 raise Exception("Packet doesn't exist.")
             _, x, y = value.split(":")
-            if x not in ["Ether", "IP", "ICMP", "Raw"]:
+            if x not in ["Ether", "IP", "ICMP", "UDP", "DNS", "Raw"]:
                 raise Exception("Part doesn't exist.")
             # TODO: try-catch
             args[key] = getattr(packet_arg[getScapyMethod(x)], y)
@@ -98,6 +98,8 @@ def parse_args(
                             )
 
                 args[key] = prn
+            elif key == "qd":  # DNSQR
+                args[key] = scapy_all.DNSQR(**parse_args(value, packet_arg=packet_arg))
             else:
                 raise Exception(
                     "Invalid Function Call Argument. TODO: Narrow Exception Type"
@@ -114,13 +116,15 @@ def parse_args(
                     packet = None
 
                     for match in (
-                        x for x in ["Ether", "IP", "ICMP", "Raw"] if x in packetObject
+                        x
+                        for x in ["Ether", "IP", "ICMP", "UDP", "DNS", "Raw"]
+                        if x in packetObject
                     ):
                         print(match)
                         copiedObject = {
                             k: packetObject[match][k]
                             for k in packetObject[match].keys()
-                            if k not in ["Ether", "IP", "ICMP", "Raw"]
+                            if k not in ["Ether", "IP", "ICMP", "UDP", "DNS", "Raw"]
                         }
 
                         if packet is None:

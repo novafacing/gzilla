@@ -9,6 +9,6 @@ send: # https://scapy.readthedocs.io/en/latest/api/scapy.sendrecv.html?highlight
                   qdcount: 1
                   qd:
                     qname: "xxxxx.example.edu" # https://scapy.readthedocs.io/en/latest/api/scapy.layers.dns.html#scapy.layers.dns.DNSQR
-                    qtype: 1 # A
-                    qclass: 1 # IN
-    iface: "eth0"
+                    qtype: "A" # A
+                    qclass: "IN" # IN
+    iface: "ens33"
