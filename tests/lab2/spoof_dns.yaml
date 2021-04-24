@@ -8,7 +8,7 @@ send: # https://scapy.readthedocs.io/en/latest/api/scapy.sendrecv.html?highlight
                 dport: 33333 # 33333 is hardcoded setup port
 
                 DNS: # https://scapy.readthedocs.io/en/latest/api/scapy.layers.dns.html#scapy.layers.dns.DNS
-                  id: 0 # Need to brute force this
+                  id: "python:__import__('random').randint(0, 0xffff)" # Need to brute force this
                   qr: 1 # Response
                   qdcount: 1
                   ancount: 1
