@@ -24,13 +24,12 @@ RUN pip3 install -r requirements.txt
 RUN rm -f requirements.txt
 
 # Set up bind9 config files
-COPY ./attacker_files/example.edu.db /etc/bind/example.edu.db
-COPY ./attacker_files/named.conf.local /etc/bind/named.conf.local
-COPY ./attacker_files/resolv.conf /etc/resolv.conf
+COPY ./docker_files/attacker_files/example.edu.db /etc/bind/example.edu.db
+COPY ./docker_files/attacker_files/named.conf.local /etc/bind/named.conf.local
+COPY ./docker_files/attacker_files/resolv.conf /etc/resolv.conf
+COPY ./tests/ /tests
+COPY ./gzilla/ /gzilla
 
-COPY ./init.sh /init.sh
-
-RUN mkdir -p /attacker_files
-WORKDIR /attacker_files
+COPY ./docker_files/init.sh /init.sh
 
 ENTRYPOINT ["/init.sh"]

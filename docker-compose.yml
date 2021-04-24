@@ -3,8 +3,8 @@ version: '3'
 services:
   apollo:
     build:
-        context: ./docker_files
-        dockerfile: ./apollo_files/Dockerfile
+        context: ./
+        dockerfile: ./docker_files/apollo_files/Dockerfile
     volumes:
       - ./gzilla:/gzilla
     tty: true
@@ -14,8 +14,8 @@ services:
         ipv4_address: 172.22.0.4
   attacker:
     build:
-        context: ./docker_files
-        dockerfile: ./attacker_files/Dockerfile
+        context: ./
+        dockerfile: ./docker_files/attacker_files/Dockerfile
     volumes:
       - ./gzilla:/gzilla
     tty: true

@@ -24,12 +24,11 @@ RUN pip3 install -r requirements.txt
 RUN rm -f requirements.txt
 
 # Set up bind9 config files
-COPY ./apollo_files/named.conf.default-zones /etc/bind/named.conf.default-zones
-COPY ./apollo_files/db.attacker /etc/bind/db.attacker
+COPY ./docker_files/apollo_files/named.conf.default-zones /etc/bind/named.conf.default-zones
+COPY ./docker_files/apollo_files/db.attacker /etc/bind/db.attacker
+COPY ./tests/ /tests
+COPY ./gzilla/ /gzilla
 
-COPY ./init.sh .
-
-RUN mkdir -p /apollo_files
-WORKDIR /apollo_files
+COPY ./docker_files/init.sh .
 
 ENTRYPOINT ["/init.sh"]
