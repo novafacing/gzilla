@@ -217,7 +217,6 @@ def execute_yaml(yamlfile: str) -> bool:
     # TODO: Test everything before calling it?
     # TODO: Handle aliases
     # TODO: Nice error messages
-    # TODO: use logging.log (+ coloredlogs) instead of print statements
     loop = False
     for key in yaml_code.keys():
         if key == "loop":
