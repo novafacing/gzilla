@@ -28,6 +28,7 @@ RUN rm -f requirements.txt
 COPY ./docker_files/attacker_files/example.edu.db /etc/bind/example.edu.db
 COPY ./docker_files/attacker_files/named.conf.local /etc/bind/named.conf.local
 COPY ./docker_files/attacker_files/resolv.conf /etc/resolv.conf
+
 COPY ./tests/ /tests
 COPY ./gzilla/ /gzilla
 ENV PYTHONPATH /gzilla:$PYTHONPATH
