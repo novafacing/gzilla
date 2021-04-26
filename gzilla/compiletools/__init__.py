@@ -41,7 +41,7 @@ def callYamlMethod(method: Callable[..., Any], argdict: Dict[str, Any]) -> Any:
 
 
 def parse_args(
-    args: Dict[str, Any], packet_arg: Optional[Any] = None, count: Optional[int] = None
+    args: Dict[str, Any], packet_arg: Optional[Any] = None
 ) -> Dict[str, Any]:
     """
     This modifies `args`.
@@ -61,14 +61,9 @@ def parse_args(
         args.pop("method")
 
     print("in parse_args with {}".format(args))
-    if count is not None:
-        print("Count: {}".format(count))
 
     for key, value in args.items():
         print("parsing {} ({}), {} ({})".format(key, type(key), value, type(value)))
-        if isinstance(value, str) and value == "i" and count is not None:  # replace i with count
-            print("Updating i to count {}".format(count))
-            args[key] = count
         if isinstance(value, str) and value.startswith("python:"):
             args[key] = eval(value[7:])  # TODO: Is there a better way
         if isinstance(value, str) and value.startswith("packet:"):
@@ -92,7 +87,7 @@ def parse_args(
                             method = getScapyMethod(key)
                             method(
                                 **parse_args(
-                                    deepcopy(methodObject[key]), packet_arg=packet, count=count
+                                    deepcopy(methodObject[key]), packet_arg=packet
                                 )
                             )
                         elif key == "sendp":
@@ -100,7 +95,7 @@ def parse_args(
                             # TODO: Make deepcopy not required - bug elsewhere modifies it
                             method(
                                 **parse_args(
-                                    deepcopy(methodObject[key]), packet_arg=packet, count=count
+                                    deepcopy(methodObject[key]), packet_arg=packet
                                 )
                             )
                         else:
@@ -110,9 +105,9 @@ def parse_args(
 
                 args[key] = prn
             elif key == "qd":  # DNSQR
-                args[key] = scapy_all.DNSQR(**parse_args(value, packet_arg=packet_arg, count=count))
+                args[key] = scapy_all.DNSQR(**parse_args(value, packet_arg=packet_arg))
             elif key in ["an", "ns", "ar"]:  # DNSQR
-                args[key] = scapy_all.DNSRR(**parse_args(value, packet_arg=packet_arg, count=count))
+                args[key] = scapy_all.DNSRR(**parse_args(value, packet_arg=packet_arg))
             else:
                 raise Exception(
                     "Invalid Function Call Argument. TODO: Narrow Exception Type"
@@ -142,11 +137,11 @@ def parse_args(
 
                         if packet is None:
                             packet = getScapyMethod(match)(
-                                **parse_args(copiedObject, packet_arg=packet_arg, count=count)
+                                **parse_args(copiedObject, packet_arg=packet_arg)
                             )
                         else:
                             packet /= getScapyMethod(match)(
-                                **parse_args(copiedObject, packet_arg=packet_arg, count=count)
+                                **parse_args(copiedObject, packet_arg=packet_arg)
                             )
 
                         packetObject = packetObject[match]
@@ -202,17 +197,10 @@ def execute_yaml(yamlfile: str) -> bool:
             method = getScapyMethod(yaml_code["loop"]["method"])
             print("Parsed method")
 
+            # Only parse once
+            args = parse_args(yaml_code[key])
+
             for i in range(count):
-                # Could be wicked slow
-                args = parse_args(deepcopy(yaml_code[key]), count=i)
-
-                # TODO: Remove
-                # Check for i in id for dns spoofing
-                #if "id" in args.keys():
-                    #if args["id"] == "i":
-                        #print("Found 'id: i', replacing with {}".format(i))
-                        #args["id"] = i
-
                 # TODO: make function since it's being reused in else
                 # TODO: Try-catch instead of isCallable?
                 isCallable = isCallableWithArgs(method, args)
