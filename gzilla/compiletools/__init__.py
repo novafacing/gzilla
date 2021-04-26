@@ -3,6 +3,9 @@ import inspect
 import scapy.all as scapy_all
 from typing import Callable, Dict, Any, List, Set, Optional
 from copy import deepcopy, copy
+import logging
+
+log = logging.getLogger(__name__)
 
 # https://stackoverflow.com/questions/196960/can-you-list-the-keyword-arguments-a-function-receives
 def getRequiredArgs(func: Callable[..., Any]) -> List[str]:
@@ -60,10 +63,10 @@ def parse_args(
     if "method" in args.keys():
         args.pop("method")
 
-    print("in parse_args with {}".format(args))
+    log.debug("in parse_args with {}".format(args))
 
     for key, value in args.items():
-        print("parsing {} ({}), {} ({})".format(key, type(key), value, type(value)))
+        log.debug("parsing {} ({}), {} ({})".format(key, type(key), value, type(value)))
         if isinstance(value, str) and value.startswith("python:"):
             args[key] = eval(value[7:])  # TODO: Is there a better way
         if isinstance(value, str) and value.startswith("packet:"):
@@ -81,7 +84,7 @@ def parse_args(
                 methodObject = args[key]  # Error Handling?
 
                 def prn(packet: Any) -> None:
-                    print(dir(packet))
+                    log.debug(dir(packet))
                     for key in methodObject.keys():
                         if key == "send":
                             method = getScapyMethod(key)
@@ -159,7 +162,7 @@ def parse_args(
                         for x in ["Ether", "IP", "ICMP", "UDP", "DNS", "Raw"]
                         if x in packetObject
                     ):
-                        print(match)
+                        log.debug(match)
                         copiedObject = {
                             k: packetObject[match][k]
                             for k in packetObject[match].keys()
@@ -180,7 +183,7 @@ def parse_args(
                     if packet:
                         packets.append(packet)
 
-                print("Built packets:", packets)
+                log.info(f"Built packets: {packets}")
                 args["x"] = packets
             else:
                 raise Exception("Invalid List Element in Yaml.")
@@ -188,7 +191,7 @@ def parse_args(
         else:
             pass  # Leave other arguments unmodified
 
-    print("args:", args)
+    log.debug(f"args: {args}")
 
     return args
 
@@ -201,9 +204,9 @@ def execute_yaml(yamlfile: str) -> bool:
         with open(yamlfile, "r") as f:
             yaml_code = yaml.safe_load(f)
     except yaml.YAMLError as exc:
-        print("Error in configuration file:", exc)
+        log.error("Error in configuration file:", exc)
 
-    print(yaml_code)
+    log.debug(yaml_code)
     # {'sniff': {'interface': 'eth0', 'filter': 'tcp and portrange 50-100', 'count': 10, 'quiet': False}}
 
     # {'sniff': {'interface': 'eth0', 'filter': 'icmp and icmp[icmptype] == icmp-echo', 'count': 10,
@@ -218,15 +221,15 @@ def execute_yaml(yamlfile: str) -> bool:
     loop = False
     for key in yaml_code.keys():
         if key == "loop":
-            print("Parsed loop")
+            log.info("Parsed loop")
             loop = True
 
         if loop:
             count = yaml_code["loop"]["count"]
-            print("Parsed count: {}".format(count))
+            log.debug("Parsed count: {}".format(count))
 
             method = getScapyMethod(yaml_code["loop"]["method"])
-            print("Parsed method")
+            log.debug("Parsed method")
 
             # Only parse once
             args = parse_args(yaml_code[key])
@@ -236,11 +239,11 @@ def execute_yaml(yamlfile: str) -> bool:
                 # TODO: Try-catch instead of isCallable?
                 isCallable = isCallableWithArgs(method, args)
                 if isCallable:
-                    print(f"{key} is callable with {args}.")
-                    print(f"Calling {key}(**{args})")
+                    log.info(f"{key} is callable with {args}.")
+                    log.info(f"Calling {key}(**{args})")
                     method(**args)
                 else:
-                    print(f"{key} is not callable with {args}.")
+                    log.error(f"{key} is not callable with {args}.")
                     return False
 
         else:
@@ -251,11 +254,11 @@ def execute_yaml(yamlfile: str) -> bool:
             # TODO: Try-catch instead of isCallable?
             isCallable = isCallableWithArgs(method, args)
             if isCallable:
-                print(f"{key} is callable with {args}.")
-                print(f"Calling {key}(**{args})")
+                log.info(f"{key} is callable with {args}.")
+                log.info(f"Calling {key}(**{args})")
                 method(**args)
             else:
-                print(f"{key} is not callable with {args}.")
+                log.error(f"{key} is not callable with {args}.")
                 return False
 
     return True
