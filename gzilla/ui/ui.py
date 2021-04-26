@@ -14,12 +14,14 @@ import sys
 
 from gz_ui import Ui_MainWindow
 
+
 class FieldType(Enum):
     STRING = 0
     INT = 1
     FUNCTION = 2
     ARRAY = 3
     INVALID = -1
+
 
 class Field:
     def __init__(self, name="", type: FieldType = FieldType.INVALID) -> None:
@@ -28,20 +30,32 @@ class Field:
 
 
 class Sniff:
-    fields_desc = [Field(name="interface", type=FieldType.STRING), Field(name="filter", type=FieldType.STRING), Field(name="count", type=FieldType.INT),Field(name="prn", type=FieldType.FUNCTION)]
+    fields_desc = [
+        Field(name="interface", type=FieldType.STRING),
+        Field(name="filter", type=FieldType.STRING),
+        Field(name="count", type=FieldType.INT),
+        Field(name="prn", type=FieldType.FUNCTION),
+    ]
+
 
 class Spoof:
-    fields_desc = [Field(name="packets", type=FieldType.ARRAY), Field(name="iface", type=FieldType.STRING)] 
+    fields_desc = [
+        Field(name="packets", type=FieldType.ARRAY),
+        Field(name="iface", type=FieldType.STRING),
+    ]
+
 
 class TextNode(QStandardItem):
     def __init__(self, txt="") -> None:
         super().__init__()
         self.setText(txt)
 
+
 class KeyValueNode(QStandardItem):
-    def __init__(self, txt=''):
+    def __init__(self, txt=""):
         super().__init__()
         self.appendColumn([TextNode(txt), QStandardItem()])
+
 
 class GzillaCallbacks(object):
     def tree_depth(self):
@@ -52,7 +66,7 @@ class GzillaCallbacks(object):
         selected = idx.model().itemFromIndex(idx)
         print(selected)
 
-    def editor_sync(self):  
+    def editor_sync(self):
         print("Editor sync.")
 
     def tree_sync(self):
@@ -97,8 +111,6 @@ class GzillaCallbacks(object):
             ether_node.appendRow(KeyValueNode(f))
         self.current_selection.appendRow(ether_node)
         self.yaml_builder.expandAll()
-
-
 
     def new_ip(self):
         print("New ip")
@@ -181,6 +193,7 @@ class GzillaCallbacks(object):
         self.new_tcp_button.clicked.connect(self.new_tcp)
         self.new_icmp_button.clicked.connect(self.new_icmp)
         self.new_dns_button.clicked.connect(self.new_dns)
+
 
 class GzillaUi(QMainWindow, Ui_MainWindow, GzillaCallbacks):  # type: ignore
     """Import UI spec from designer UI file."""
