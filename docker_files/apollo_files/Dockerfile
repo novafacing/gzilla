@@ -20,6 +20,7 @@ RUN apt-get -y update && \
 
 # Install python packages
 COPY requirements.txt ./
+RUN pip3 install --upgrade pip
 RUN pip3 install -r requirements.txt
 RUN rm -f requirements.txt
 
