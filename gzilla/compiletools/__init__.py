@@ -41,7 +41,7 @@ def callYamlMethod(method: Callable[..., Any], argdict: Dict[str, Any]) -> Any:
 
 
 def parse_args(
-    args: Dict[str, Any], packet_arg: Optional[Any] = None
+    args: Dict[str, Any], packet_arg: Optional[Any] = None, count: Optional[int] = None
 ) -> Dict[str, Any]:
     """
     This modifies `args`.
@@ -54,10 +54,21 @@ def parse_args(
             # packets is an alias for 'x' in 'send' and 'sendp'
             args[value] = args.pop(key)
 
+    # Remove count & method (for loop key)
+    if "count" in args.keys():
+        args.pop("count")
+    if "method" in args.keys():
+        args.pop("method")
+
     print("in parse_args with {}".format(args))
+    if count is not None:
+        print("Count: {}".format(count))
 
     for key, value in args.items():
-        print("parsing {}, {}".format(key, value))
+        print("parsing {} ({}), {} ({})".format(key, type(key), value, type(value)))
+        if isinstance(value, str) and value == "i" and count is not None:  # replace i with count
+            print("Updating i to count {}".format(count))
+            args[key] = count
         if isinstance(value, str) and value.startswith("python:"):
             args[key] = eval(value[7:])  # TODO: Is there a better way
         if isinstance(value, str) and value.startswith("packet:"):
@@ -81,7 +92,7 @@ def parse_args(
                             method = getScapyMethod(key)
                             method(
                                 **parse_args(
-                                    deepcopy(methodObject[key]), packet_arg=packet
+                                    deepcopy(methodObject[key]), packet_arg=packet, count=count
                                 )
                             )
                         elif key == "sendp":
@@ -89,7 +100,7 @@ def parse_args(
                             # TODO: Make deepcopy not required - bug elsewhere modifies it
                             method(
                                 **parse_args(
-                                    deepcopy(methodObject[key]), packet_arg=packet
+                                    deepcopy(methodObject[key]), packet_arg=packet, count=count
                                 )
                             )
                         else:
@@ -99,9 +110,9 @@ def parse_args(
 
                 args[key] = prn
             elif key == "qd":  # DNSQR
-                args[key] = scapy_all.DNSQR(**parse_args(value, packet_arg=packet_arg))
+                args[key] = scapy_all.DNSQR(**parse_args(value, packet_arg=packet_arg, count=count))
             elif key in ["an", "ns", "ar"]:  # DNSQR
-                args[key] = scapy_all.DNSRR(**parse_args(value, packet_arg=packet_arg))
+                args[key] = scapy_all.DNSRR(**parse_args(value, packet_arg=packet_arg, count=count))
             else:
                 raise Exception(
                     "Invalid Function Call Argument. TODO: Narrow Exception Type"
@@ -131,11 +142,11 @@ def parse_args(
 
                         if packet is None:
                             packet = getScapyMethod(match)(
-                                **parse_args(copiedObject, packet_arg=packet_arg)
+                                **parse_args(copiedObject, packet_arg=packet_arg, count=count)
                             )
                         else:
                             packet /= getScapyMethod(match)(
-                                **parse_args(copiedObject, packet_arg=packet_arg)
+                                **parse_args(copiedObject, packet_arg=packet_arg, count=count)
                             )
 
                         packetObject = packetObject[match]
@@ -178,20 +189,54 @@ def execute_yaml(yamlfile: str) -> bool:
     # TODO: Handle aliases
     # TODO: Nice error messages
     # TODO: use logging.log (+ coloredlogs) instead of print statements
+    loop = False
     for key in yaml_code.keys():
+        if key == "loop":
+            print("Parsed loop")
+            loop = True
 
-        method = getScapyMethod(key)  # Error Handling?
+        if loop:
+            count = yaml_code["loop"]["count"]
+            print("Parsed count: {}".format(count))
 
-        args = parse_args(yaml_code[key])
+            method = getScapyMethod(yaml_code["loop"]["method"])
+            print("Parsed method")
 
-        # TODO: Try-catch instead of isCallable?
-        isCallable = isCallableWithArgs(method, args)
-        if isCallable:
-            print(f"{key} is callable with {args}.")
-            print(f"Calling {key}(**{args})")
-            method(**args)
+            for i in range(count):
+                # Could be wicked slow
+                args = parse_args(deepcopy(yaml_code[key]), count=i)
+
+                # TODO: Remove
+                # Check for i in id for dns spoofing
+                #if "id" in args.keys():
+                    #if args["id"] == "i":
+                        #print("Found 'id: i', replacing with {}".format(i))
+                        #args["id"] = i
+
+                # TODO: make function since it's being reused in else
+                # TODO: Try-catch instead of isCallable?
+                isCallable = isCallableWithArgs(method, args)
+                if isCallable:
+                    print(f"{key} is callable with {args}.")
+                    print(f"Calling {key}(**{args})")
+                    method(**args)
+                else:
+                    print(f"{key} is not callable with {args}.")
+                    return False
+
         else:
-            print(f"{key} is not callable with {args}.")
-            return False
+            method = getScapyMethod(key)  # Error Handling?
+
+            args = parse_args(yaml_code[key])
+
+            # TODO: Try-catch instead of isCallable?
+            isCallable = isCallableWithArgs(method, args)
+            if isCallable:
+                print(f"{key} is callable with {args}.")
+                print(f"Calling {key}(**{args})")
+                method(**args)
+            else:
+                print(f"{key} is not callable with {args}.")
+                return False
 
     return True

