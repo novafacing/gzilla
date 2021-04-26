@@ -104,6 +104,37 @@ def parse_args(
                             )
 
                 args[key] = prn
+            if key == "loop":
+                # callback function on each packet
+                # NOTE: UNTESTED
+                methodObject = args[key]["method"]  # Error Handling?
+                count = args[key]["count"]  # Error Handling?
+
+                def loop() -> None:
+                    for i in range(count):
+                        for key in methodObject.keys():
+                            # TODO: support `python:`?
+                            if key == "send":
+                                method = getScapyMethod(key)
+                                method(
+                                    **parse_args(
+                                        deepcopy(methodObject[key]), packet_arg=packet
+                                    )
+                                )
+                            elif key == "sendp":
+                                method = getScapyMethod(key)
+                                # TODO: Make deepcopy not required - bug elsewhere modifies it
+                                method(
+                                    **parse_args(
+                                        deepcopy(methodObject[key]), packet_arg=packet
+                                    )
+                                )
+                            else:
+                                raise Exception(
+                                    "Invalid Scapy Function for loop. TODO: Narrow Exception Name"
+                                )
+
+                args[key] = loop
             elif key == "qd":  # DNSQR
                 args[key] = scapy_all.DNSQR(**parse_args(value, packet_arg=packet_arg))
             elif key in ["an", "ns", "ar"]:  # DNSQR
