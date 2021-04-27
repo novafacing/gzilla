@@ -8,29 +8,6 @@ import logging
 log = logging.getLogger(__name__)
 
 
-# https://stackoverflow.com/questions/196960/can-you-list-the-keyword-arguments-a-function-receives
-def getRequiredArgs(func: Callable[..., Any]) -> List[str]:
-    args, varargs, varkw, defaults = inspect.getargspec(func)
-    if defaults:
-        args = args[: -len(defaults)]
-    return args  # *args and **kwargs are not required, so ignore them.
-
-
-def missingArgs(func: Callable[..., Any], argdict: Dict[str, Any]) -> Set[str]:
-    return set(getRequiredArgs(func)).difference(argdict)
-
-
-def invalidArgs(func: Callable[..., Any], argdict: Dict[str, Any]) -> Set[str]:
-    args, varargs, varkw, defaults = inspect.getargspec(func)
-    if varkw:
-        return set()  # All accepted
-    return set(argdict) - set(args)
-
-
-def isCallableWithArgs(func: Callable[..., Any], argdict: Dict[str, Any]) -> bool:
-    return not missingArgs(func, argdict) and not invalidArgs(func, argdict)
-
-
 def getScapyMethod(method_str: str) -> Any:
     try:
         method = getattr(scapy_all, method_str)
@@ -206,36 +183,35 @@ def parse_and_run(yaml_code: Dict) -> bool:
     # TODO: Test everything before calling it?
     # TODO: Handle aliases
     # TODO: Nice error messages
-    for key in yaml_code.keys():
-        loop = False
-        try:
-            method = getScapyMethod(key)  # Error Handling?
-        except AttributeError as e:
-            if key == "loop":
-                log.info(f"Loop detected with key: {key}, {yaml_code}")
-                method = None
+    try:
+        for key in yaml_code.keys():
+            loop = False
+            try:
+                method = getScapyMethod(key)  # Error Handling?
+            except AttributeError as e:
+                if key == "loop":
+                    log.info(f"Loop detected with key: {key}, {yaml_code}")
+                    method = None
+                    loop = True
+                else:
+                    log.error(f"AttributeError: {e}")
+
+            if loop:
+                args = parse_args({"loop": yaml_code[key]})
+                method = args["loop"]
                 loop = True
             else:
-                log.error(f"AttributeError: {e}")
+                args = parse_args(yaml_code[key])
 
-        if loop:
-            args = parse_args({"loop": yaml_code[key]})
-            method = args["loop"]
-            loop = True
-        else:
-            args = parse_args(yaml_code[key])
-
-        # TODO: Try-catch instead of isCallable?
-        if not loop:
-            isCallable = isCallableWithArgs(method, args)
-            if isCallable:
+            if not loop:
                 log.info(f"{key} is callable with {args}.")
                 log.info(f"Calling {key}(**{args})")
                 method(**args)
             else:
-                log.error(f"{key} is not callable with {args}.")
-                return False
-        else:
-            method()
+                method()
 
-    return True
+        return True
+    except Exception as e:
+        log.warning("Unable to execute yaml:")
+        log.warning(e)
+        return False
