@@ -20,6 +20,7 @@ from json import loads, dumps
 from nested_lookup import nested_lookup, nested_update
 
 from gz_ui import Ui_MainWindow
+from gzilla.compiletools import *
 
 
 class FieldType(Enum):
@@ -44,28 +45,17 @@ class Field:
 
 class Sniff:
     fields_desc = [
-<<<<<<< HEAD
         Field(name="interface: ", type=FieldType.STRING, default="eth0"),
         Field(name="filter: ", type=FieldType.STRING, default="ip"),
         Field(name="count: ", type=FieldType.INT, default="1"),
         Field(name="prn: ", type=FieldType.FUNCTION),
-=======
-        Field(name="interface", type=FieldType.STRING),
-        Field(name="filter", type=FieldType.STRING),
-        Field(name="count", type=FieldType.INT),
-        Field(name="prn", type=FieldType.FUNCTION),
->>>>>>> 86c74971f60aa112e91fc7035565c3881be50af7
     ]
 
 
 class Spoof:
     fields_desc = [
         Field(name="packets", type=FieldType.ARRAY),
-<<<<<<< HEAD
         Field(name="iface: ", type=FieldType.STRING, default="eth0"),
-=======
-        Field(name="iface", type=FieldType.STRING),
->>>>>>> 86c74971f60aa112e91fc7035565c3881be50af7
     ]
 
 
@@ -83,14 +73,11 @@ class TextNode(QStandardItem):
             node.setText(node.text())
         super().appendRow(node)
 
-<<<<<<< HEAD
-=======
 
 class KeyValueNode(QStandardItem):
     def __init__(self, txt=""):
         super().__init__()
         self.appendColumn([TextNode(txt), QStandardItem()])
->>>>>>> 86c74971f60aa112e91fc7035565c3881be50af7
 
 
 class GzillaCallbacks(object):
@@ -102,7 +89,6 @@ class GzillaCallbacks(object):
         selected = idx.model().itemFromIndex(idx)
         print(selected)
 
-<<<<<<< HEAD
     def fill_model_from_json(self, parent, d):
         if isinstance(d, dict):
             for k, v in d.items():
@@ -114,10 +100,6 @@ class GzillaCallbacks(object):
                 self.fill_model_from_json(parent, v)
         else:
             parent.appendRow(TextNode(str(d)))
-=======
-    def editor_sync(self):
-        print("Editor sync.")
->>>>>>> 86c74971f60aa112e91fc7035565c3881be50af7
 
     def tree_sync(self):
         print("Tree sync.")
@@ -212,11 +194,7 @@ class GzillaCallbacks(object):
         self.current_selection.appendRow(ether_node)
         self.yaml_builder.expandAll()
 
-<<<<<<< HEAD
     def new_ip(self) -> None:
-=======
-    def new_ip(self):
->>>>>>> 86c74971f60aa112e91fc7035565c3881be50af7
         print("New ip")
         if self.tree_depth() == 0:
             # ERR
@@ -316,6 +294,7 @@ class GzillaCallbacks(object):
             savefile.write(self.ymlfile)
         print("Saved!")
         print(self.ymlfile)
+        execute_yaml("file.yml")
 
     def init_buttons(self):
         self.run_button.clicked.connect(self.save_and_run)
