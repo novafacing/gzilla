@@ -30,3 +30,4 @@ typed-ast==1.4.3
 typing-extensions==3.7.4.3
 virtualenv==20.4.4
 zipp==3.4.1
+coloredlogs==15.0
