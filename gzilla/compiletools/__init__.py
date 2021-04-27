@@ -88,7 +88,7 @@ def parse_args(
                             )
 
                 args[key] = prn
-            if key == "loop":
+            elif key == "loop":
                 # callback function on each packet
                 count = args[key]["count"]  # Error Handling?
                 methodObject = args[key]["method"]  # Error Handling?

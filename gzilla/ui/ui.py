@@ -12,6 +12,7 @@ from ui.constants import UI_FILE
 from scapy.layers.inet import IP, UDP, TCP, ICMP
 from scapy.layers.dns import DNS
 from scapy.layers.l2 import Ether
+from scapy.all import *
 import sys
 from typing import Optional
 from pprint import pprint
@@ -48,7 +49,7 @@ class Sniff:
         Field(name="interface: ", type=FieldType.STRING, default="eth0"),
         Field(name="filter: ", type=FieldType.STRING, default="ip"),
         Field(name="count: ", type=FieldType.INT, default="1"),
-        Field(name="prn: ", type=FieldType.FUNCTION),
+        Field(name="prn", type=FieldType.FUNCTION),
     ]
 
 
@@ -112,10 +113,37 @@ class GzillaCallbacks(object):
             # New toplevel
             e = Sniff()
             fields = tuple(map(lambda f: f.name, e.fields_desc))
-            sniff_node = TextNode("sniff: ")
+            sniff_node = TextNode("sniff")
             self.root = sniff_node
             for f in fields:
-                sniff_node.appendRow(TextNode(f))
+                node = TextNode(f)
+                if f == "prn":
+                    sendpnode = TextNode("send")
+                    node.appendRow(sendpnode)
+                    sendpnode.appendRow(TextNode("packets"))
+                    sendpnode.appendRow(TextNode("iface: "))
+                sniff_node.appendRow(node)
+            self.yaml_data_root.appendRow(sniff_node)
+            self.yaml_builder.expandAll()
+            pass
+
+    def new_sniff_eth(self):
+        print("New sniff.")
+        if self.tree_depth() == 0:
+            # New toplevel
+            e = Sniff()
+            fields = tuple(map(lambda f: f.name, e.fields_desc))
+            sniff_node = TextNode("sniff")
+            self.root = sniff_node
+            for f in fields:
+                node = TextNode(f)
+                if f == "prn":
+                    sendpnode = TextNode("sendp")
+                    node.appendRow(sendpnode)
+                    sendpnode.appendRow(TextNode("packets"))
+                    sendpnode.appendRow(TextNode("iface: "))
+
+                sniff_node.appendRow(node)
             self.yaml_data_root.appendRow(sniff_node)
             self.yaml_builder.expandAll()
             pass
@@ -145,7 +173,7 @@ class GzillaCallbacks(object):
             d[parent_index.data()] = v
         else:
             dt = parent_index.data().split(":")
-            dd = dt[1].lstrip().rstrip()
+            dd = ":".join(dt[1:]).lstrip().rstrip()
             try:
                 dp = int(dd, 10)
             except:
@@ -167,7 +195,21 @@ class GzillaCallbacks(object):
             # New toplevel
             e = Spoof()
             fields = tuple(map(lambda f: f.name, e.fields_desc))
-            spoof_node = TextNode("spoof")
+            spoof_node = TextNode("send")
+            self.root = spoof_node
+            for f in fields:
+                spoof_node.appendRow(TextNode(f))
+            self.yaml_data_root.appendRow(spoof_node)
+            self.yaml_builder.expandAll()
+            pass
+
+    def new_spoof_eth(self) -> None:
+        print("New spoof")
+        if self.tree_depth() == 0:
+            # New toplevel
+            e = Spoof()
+            fields = tuple(map(lambda f: f.name, e.fields_desc))
+            spoof_node = TextNode("sendp")
             self.root = spoof_node
             for f in fields:
                 spoof_node.appendRow(TextNode(f))
@@ -190,7 +232,7 @@ class GzillaCallbacks(object):
         )
         ether_node = TextNode("Ether")
         for f in fields:
-            ether_node.appendRow(TextNode(f[0] + ": " + f[1]))
+            ether_node.appendRow(TextNode(f[0] + ": "))
         self.current_selection.appendRow(ether_node)
         self.yaml_builder.expandAll()
 
@@ -209,7 +251,7 @@ class GzillaCallbacks(object):
         )
         ip_node = TextNode("IP")
         for f in fields:
-            ip_node.appendRow(TextNode(f[0] + ": " + f[1]))
+            ip_node.appendRow(TextNode(f[0] + ": "))
         self.current_selection.appendRow(ip_node)
         self.yaml_builder.expandAll()
 
@@ -228,7 +270,7 @@ class GzillaCallbacks(object):
         )
         udp_node = TextNode("UDP")
         for f in fields:
-            udp_node.appendRow(TextNode(f[0] + ": " + f[1]))
+            udp_node.appendRow(TextNode(f[0] + ": "))
         self.current_selection.appendRow(udp_node)
         self.yaml_builder.expandAll()
 
@@ -247,7 +289,26 @@ class GzillaCallbacks(object):
         )
         tcp_node = TextNode("TCP")
         for f in fields:
-            tcp_node.appendRow(TextNode(f[0] + ": " + f[1]))
+            tcp_node.appendRow(TextNode(f[0] + ": "))
+        self.current_selection.appendRow(tcp_node)
+        self.yaml_builder.expandAll()
+
+    def new_raw(self) -> None:
+        print("New raw")
+        if self.tree_depth() == 0:
+            # ERR
+            return
+
+        e = Raw()
+        fields = tuple(
+            map(
+                lambda f: (f.name, str(f.default) if f.default is not None else ""),
+                e.fields_desc,
+            )
+        )
+        tcp_node = TextNode("Raw")
+        for f in fields:
+            tcp_node.appendRow(TextNode(f[0] + ": "))
         self.current_selection.appendRow(tcp_node)
         self.yaml_builder.expandAll()
 
@@ -266,7 +327,7 @@ class GzillaCallbacks(object):
         )
         icmp_node = TextNode("ICMP")
         for f in fields:
-            icmp_node.appendRow(TextNode(f[0] + ": " + f[1]))
+            icmp_node.appendRow(TextNode(f[0] + ": "))
         self.current_selection.appendRow(icmp_node)
         self.yaml_builder.expandAll()
 
@@ -285,11 +346,12 @@ class GzillaCallbacks(object):
         )
         dns_node = TextNode("DNS")
         for f in fields:
-            dns_node.appendRow(TextNode(f[0] + ": " + f[1]))
+            dns_node.appendRow(TextNode(f[0] + ": "))
         self.current_selection.appendRow(dns_node)
         self.yaml_builder.expandAll()
 
     def save_and_run(self) -> None:
+        self.ymlfile = self.editor.text()
         with open("file.yml", "w") as savefile:
             savefile.write(self.ymlfile)
         print("Saved!")
@@ -301,12 +363,15 @@ class GzillaCallbacks(object):
         self.tree_sync_button.clicked.connect(self.tree_sync)
         self.new_sniff_button.clicked.connect(self.new_sniff)
         self.new_spoof_button.clicked.connect(self.new_spoof)
+        self.new_sniff_eth_button.clicked.connect(self.new_sniff_eth)
+        self.new_spoof_eth_button.clicked.connect(self.new_spoof_eth)
         self.new_ethernet_button.clicked.connect(self.new_ethernet)
         self.new_ip_button.clicked.connect(self.new_ip)
         self.new_udp_button.clicked.connect(self.new_udp)
         self.new_tcp_button.clicked.connect(self.new_tcp)
         self.new_icmp_button.clicked.connect(self.new_icmp)
         self.new_dns_button.clicked.connect(self.new_dns)
+        self.new_raw_button.clicked.connect(self.new_raw)
 
 
 class GzillaUi(QMainWindow, Ui_MainWindow, GzillaCallbacks):  # type: ignore
