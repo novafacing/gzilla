@@ -7,6 +7,7 @@ import logging
 
 log = logging.getLogger(__name__)
 
+
 # https://stackoverflow.com/questions/196960/can-you-list-the-keyword-arguments-a-function-receives
 def getRequiredArgs(func: Callable[..., Any]) -> List[str]:
     args, varargs, varkw, defaults = inspect.getargspec(func)
@@ -49,6 +50,7 @@ def parse_args(
     """
     This modifies `args`.
     """
+    global gzilla_var
     # TODO: Are there any aliases that depend on the function called?
     aliases = {"packets": "x", "interface": "iface"}
 
@@ -71,6 +73,8 @@ def parse_args(
                 raise Exception("Part doesn't exist.")
             # TODO: try-catch
             args[key] = getattr(packet_arg[getScapyMethod(x)], y)
+        if isinstance(value, str) and value == "GZILLA_VAR" and gzilla_var is not None:
+            args[key] = gzilla_var
 
         elif isinstance(value, dict):  # lambda call each key in function
             if key == "prn":
@@ -103,59 +107,18 @@ def parse_args(
                 args[key] = prn
             if key == "loop":
                 # callback function on each packet
-                # NOTE: UNTESTED
                 count = args[key]["count"]  # Error Handling?
                 methodObject = args[key]["method"]  # Error Handling?
-                #TODO: remove print
-                print(f"count: {count}, methodObject: {methodObject}")
+                if "variable" in args[key]:
+                    gzilla_var_eval = args[key]["variable"]
+                    gzilla_var = eval(gzilla_var_eval[7:])
 
                 def loop() -> None:
-                    print("in loop:", methodObject)
-                    first_run = True
                     for i in range(count):
-                        #TODO: remove print
-                        print(f"methodObject in loop(): {methodObject}")
-                        if first_run:
-                            parse_and_run(methodObject)
-                            first_run = False
-                        else:
-                            method_name = next(iter(methodObject))
-                            #TODO: remove print
-                            print(f"method_name in loop(): {method_name}")
-                            method = getScapyMethod(method_name)  # Error Handling?
-                            method(**methodObject[method_name])
-                        """
-                        for key in methodObject.keys():
-                            #TODO: REMOVE
-                            print(methodObject)
-                            # TODO: support `python:`?
-                            if key == "send":
-                                method = getScapyMethod(key)
-                                method(
-                                    **parse_args(
-                                        deepcopy(methodObject[key]), packet_arg=methodObject[key]["packets"]
-                                    )
-                                )
-                            elif key == "sendp":
-                                method = getScapyMethod(key)
-                                # TODO: Make deepcopy not required - bug elsewhere modifies it
-                                method(
-                                    **parse_args(
-                                        deepcopy(methodObject[key]), packet_arg=methodObject[key]
-                                    )
-                                )
-                            elif key == "loop":
-                                method(**parse_args(
-                                        deepcopy(methodObject)
-                                    )
-                                )
-                            else:
-                                raise Exception(
-                                    "Invalid Scapy Function for loop. TODO: Narrow Exception Name"
-                                )
-                                """
+                        parse_and_run(deepcopy(methodObject))
 
                 args[key] = loop
+
             elif key == "qd":  # DNSQR
                 args[key] = scapy_all.DNSQR(**parse_args(value, packet_arg=packet_arg))
             elif key in ["an", "ns", "ar"]:  # DNSQR
@@ -224,6 +187,10 @@ def execute_yaml(yamlfile: str) -> bool:
     except yaml.YAMLError as exc:
         log.error("Error in configuration file:", exc)
 
+    # Lil hack for xxxx.example.edu
+    global gzilla_var
+    gzilla_var = None
+
     return parse_and_run(yaml_code)
 
 
@@ -253,8 +220,6 @@ def parse_and_run(yaml_code: Dict) -> bool:
 
         if loop:
             args = parse_args({"loop": yaml_code[key]})
-            # TODO: remove
-            print("if loop", args)
             method = args["loop"]
             loop = True
         else:
