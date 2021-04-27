@@ -20,12 +20,15 @@ RUN apt-get -y update && \
 
 # Install python packages
 COPY requirements.txt ./
+RUN pip3 install --upgrade pip
 RUN pip3 install -r requirements.txt
 RUN rm -f requirements.txt
 
 # Set up bind9 config files
 COPY ./docker_files/apollo_files/named.conf.default-zones /etc/bind/named.conf.default-zones
+COPY ./docker_files/apollo_files/named.conf.options /etc/bind/named.conf.options
 COPY ./docker_files/apollo_files/db.attacker /etc/bind/db.attacker
+
 COPY ./tests/ /tests
 COPY ./gzilla/ /gzilla
 ENV PYTHONPATH /gzilla:$PYTHONPATH

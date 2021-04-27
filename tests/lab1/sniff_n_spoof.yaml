@@ -1,6 +1,6 @@
 # https://scapy.readthedocs.io/en/latest/api/scapy.sendrecv.html?highlight=sniff#scapy.sendrecv.sniff
 sniff:
-    interface: ens33
+    interface: eth0
     filter: "icmp and icmp[icmptype] == icmp-echo" # Echo requests only
     count: 10
     prn: # Callback function for each packet. It is called with the packet captured as its only argument.
@@ -19,4 +19,4 @@ sniff:
                             seq: "packet:ICMP:seq"
                             Raw:
                                 load: "packet:Raw:load"
-            iface: "ens33"
+            iface: "eth0"

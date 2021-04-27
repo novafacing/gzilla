@@ -3,6 +3,9 @@ import inspect
 import scapy.all as scapy_all
 from typing import Callable, Dict, Any, List, Set, Optional
 from copy import deepcopy, copy
+import logging
+
+log = logging.getLogger(__name__)
 
 # https://stackoverflow.com/questions/196960/can-you-list-the-keyword-arguments-a-function-receives
 def getRequiredArgs(func: Callable[..., Any]) -> List[str]:
@@ -54,10 +57,16 @@ def parse_args(
             # packets is an alias for 'x' in 'send' and 'sendp'
             args[value] = args.pop(key)
 
-    print("in parse_args with {}".format(args))
+    # Remove count & method (for loop key)
+    if "count" in args.keys():
+        args.pop("count")
+    if "method" in args.keys():
+        args.pop("method")
+
+    log.debug("in parse_args with {}".format(args))
 
     for key, value in args.items():
-        print("parsing {}, {}".format(key, value))
+        log.debug("parsing {} ({}), {} ({})".format(key, type(key), value, type(value)))
         if isinstance(value, str) and value.startswith("python:"):
             args[key] = eval(value[7:])  # TODO: Is there a better way
         if isinstance(value, str) and value.startswith("packet:"):
@@ -75,7 +84,7 @@ def parse_args(
                 methodObject = args[key]  # Error Handling?
 
                 def prn(packet: Any) -> None:
-                    print(dir(packet))
+                    log.debug(dir(packet))
                     for key in methodObject.keys():
                         if key == "send":
                             method = getScapyMethod(key)
@@ -98,6 +107,37 @@ def parse_args(
                             )
 
                 args[key] = prn
+            if key == "loop":
+                # callback function on each packet
+                # NOTE: UNTESTED
+                methodObject = args[key]["method"]  # Error Handling?
+                count = args[key]["count"]  # Error Handling?
+
+                def loop() -> None:
+                    for i in range(count):
+                        for key in methodObject.keys():
+                            # TODO: support `python:`?
+                            if key == "send":
+                                method = getScapyMethod(key)
+                                method(
+                                    **parse_args(
+                                        deepcopy(methodObject[key]), packet_arg=packet
+                                    )
+                                )
+                            elif key == "sendp":
+                                method = getScapyMethod(key)
+                                # TODO: Make deepcopy not required - bug elsewhere modifies it
+                                method(
+                                    **parse_args(
+                                        deepcopy(methodObject[key]), packet_arg=packet
+                                    )
+                                )
+                            else:
+                                raise Exception(
+                                    "Invalid Scapy Function for loop. TODO: Narrow Exception Name"
+                                )
+
+                args[key] = loop
             elif key == "qd":  # DNSQR
                 args[key] = scapy_all.DNSQR(**parse_args(value, packet_arg=packet_arg))
             elif key in ["an", "ns", "ar"]:  # DNSQR
@@ -122,7 +162,7 @@ def parse_args(
                         for x in ["Ether", "IP", "ICMP", "UDP", "DNS", "Raw"]
                         if x in packetObject
                     ):
-                        print(match)
+                        log.debug(match)
                         copiedObject = {
                             k: packetObject[match][k]
                             for k in packetObject[match].keys()
@@ -143,7 +183,7 @@ def parse_args(
                     if packet:
                         packets.append(packet)
 
-                print("Built packets:", packets)
+                log.info(f"Built packets: {packets}")
                 args["x"] = packets
             else:
                 raise Exception("Invalid List Element in Yaml.")
@@ -151,7 +191,7 @@ def parse_args(
         else:
             pass  # Leave other arguments unmodified
 
-    print("args:", args)
+    log.debug(f"args: {args}")
 
     return args
 
@@ -164,9 +204,9 @@ def execute_yaml(yamlfile: str) -> bool:
         with open(yamlfile, "r") as f:
             yaml_code = yaml.safe_load(f)
     except yaml.YAMLError as exc:
-        print("Error in configuration file:", exc)
+        log.error("Error in configuration file:", exc)
 
-    print(yaml_code)
+    log.debug(yaml_code)
     # {'sniff': {'interface': 'eth0', 'filter': 'tcp and portrange 50-100', 'count': 10, 'quiet': False}}
 
     # {'sniff': {'interface': 'eth0', 'filter': 'icmp and icmp[icmptype] == icmp-echo', 'count': 10,
@@ -177,21 +217,47 @@ def execute_yaml(yamlfile: str) -> bool:
     # TODO: Test everything before calling it?
     # TODO: Handle aliases
     # TODO: Nice error messages
-    # TODO: use logging.log (+ coloredlogs) instead of print statements
+    loop = False
     for key in yaml_code.keys():
+        if key == "loop":
+            log.info("Parsed loop")
+            loop = True
 
-        method = getScapyMethod(key)  # Error Handling?
+        if loop:
+            count = yaml_code["loop"]["count"]
+            log.debug("Parsed count: {}".format(count))
 
-        args = parse_args(yaml_code[key])
+            method = getScapyMethod(yaml_code["loop"]["method"])
+            log.debug("Parsed method")
 
-        # TODO: Try-catch instead of isCallable?
-        isCallable = isCallableWithArgs(method, args)
-        if isCallable:
-            print(f"{key} is callable with {args}.")
-            print(f"Calling {key}(**{args})")
-            method(**args)
+            # Only parse once
+            args = parse_args(yaml_code[key])
+
+            for i in range(count):
+                # TODO: make function since it's being reused in else
+                # TODO: Try-catch instead of isCallable?
+                isCallable = isCallableWithArgs(method, args)
+                if isCallable:
+                    log.info(f"{key} is callable with {args}.")
+                    log.info(f"Calling {key}(**{args})")
+                    method(**args)
+                else:
+                    log.error(f"{key} is not callable with {args}.")
+                    return False
+
         else:
-            print(f"{key} is not callable with {args}.")
-            return False
+            method = getScapyMethod(key)  # Error Handling?
+
+            args = parse_args(yaml_code[key])
+
+            # TODO: Try-catch instead of isCallable?
+            isCallable = isCallableWithArgs(method, args)
+            if isCallable:
+                log.info(f"{key} is callable with {args}.")
+                log.info(f"Calling {key}(**{args})")
+                method(**args)
+            else:
+                log.error(f"{key} is not callable with {args}.")
+                return False
 
     return True

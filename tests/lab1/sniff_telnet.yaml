@@ -1,6 +1,6 @@
 # https://scapy.readthedocs.io/en/latest/api/scapy.sendrecv.html?highlight=sniff#scapy.sendrecv.sniff
 sniff:
-    interface: eth0
+    iface: "eth0"
     filter: "tcp and port 23"
     count: 10
     quiet: False
