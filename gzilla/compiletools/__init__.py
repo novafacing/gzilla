@@ -28,6 +28,8 @@ def parse_args(
     This modifies `args`.
     """
     global gzilla_var
+    global gzilla_var_eval
+
     # TODO: Are there any aliases that depend on the function called?
     aliases = {"packets": "x", "interface": "iface"}
 
@@ -50,8 +52,12 @@ def parse_args(
                 raise Exception("Part doesn't exist.")
             # TODO: try-catch
             args[key] = getattr(packet_arg[getScapyMethod(x)], y)
-        if isinstance(value, str) and value == "GZILLA_VAR" and gzilla_var is not None:
-            args[key] = gzilla_var
+        if isinstance(value, str) and value == "GZILLA_VAR":
+            if gzilla_var_eval is not None:
+                log.debug(f"GZILLA_VAR updated to: {gzilla_var_eval}")
+                args[key] = gzilla_var_eval
+            else:
+                log.error("gzilla_var_eval is None")
 
         elif isinstance(value, dict):  # lambda call each key in function
             if key == "prn":
@@ -86,12 +92,18 @@ def parse_args(
                 # callback function on each packet
                 count = args[key]["count"]  # Error Handling?
                 methodObject = args[key]["method"]  # Error Handling?
+                variable = False
                 if "variable" in args[key]:
-                    gzilla_var_eval = args[key]["variable"]
-                    gzilla_var = eval(gzilla_var_eval[7:])
+                    gzilla_var = args[key]["variable"]
+                    gzilla_var_eval = eval(gzilla_var[7:])
+                    variable = True
 
                 def loop() -> None:
+                    global gzilla_var
+                    global gzilla_var_eval
                     for i in range(count):
+                        if gzilla_var is not None and variable:
+                            gzilla_var_eval = eval(gzilla_var[7:])
                         parse_and_run(deepcopy(methodObject))
 
                 args[key] = loop
@@ -166,7 +178,9 @@ def execute_yaml(yamlfile: str) -> bool:
 
     # Lil hack for xxxx.example.edu
     global gzilla_var
+    global gzilla_var_eval
     gzilla_var = None
+    gzilla_var_eval = None
 
     return parse_and_run(yaml_code)
 
