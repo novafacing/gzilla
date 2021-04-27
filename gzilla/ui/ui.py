@@ -8,7 +8,7 @@ from PyQt5.Qsci import *
 from PyQt5.Qt import QStandardItemModel, QStandardItem
 from pyqtconsole.console import PythonConsole
 from pathlib import Path
-from constants import UI_FILE
+from ui.constants import UI_FILE
 from scapy.layers.inet import IP, UDP, TCP, ICMP
 from scapy.layers.dns import DNS
 from scapy.layers.l2 import Ether
@@ -19,8 +19,8 @@ import yaml
 from json import loads, dumps
 from nested_lookup import nested_lookup, nested_update
 
-from gz_ui import Ui_MainWindow
-from gzilla.compiletools import *
+from ui.gz_ui import Ui_MainWindow
+from compiletools import *
 
 
 class FieldType(Enum):
