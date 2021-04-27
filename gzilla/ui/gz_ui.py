@@ -58,16 +58,20 @@ class Ui_MainWindow(object):
         self.new_sniff_button = QtWidgets.QPushButton(self.frame_3)
         self.new_sniff_button.setObjectName("new_sniff_button")
         self.gridLayout_4.addWidget(self.new_sniff_button, 2, 2, 1, 1)
-        spacerItem = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        spacerItem = QtWidgets.QSpacerItem(
+            40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum
+        )
         self.gridLayout_4.addItem(spacerItem, 1, 1, 1, 1)
-        spacerItem1 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        spacerItem1 = QtWidgets.QSpacerItem(
+            40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum
+        )
         self.gridLayout_4.addItem(spacerItem1, 2, 1, 1, 1)
         self.new_icmp_button = QtWidgets.QPushButton(self.frame_3)
         self.new_icmp_button.setObjectName("new_icmp_button")
         self.gridLayout_4.addWidget(self.new_icmp_button, 1, 6, 1, 1)
-        self.editor_sync_button = QtWidgets.QPushButton(self.frame_3)
-        self.editor_sync_button.setObjectName("editor_sync_button")
-        self.gridLayout_4.addWidget(self.editor_sync_button, 1, 0, 1, 1)
+        self.run_button = QtWidgets.QPushButton(self.frame_3)
+        self.run_button.setObjectName("run_button")
+        self.gridLayout_4.addWidget(self.run_button, 1, 0, 1, 1)
         self.new_dns_button = QtWidgets.QPushButton(self.frame_3)
         self.new_dns_button.setObjectName("new_dns_button")
         self.gridLayout_4.addWidget(self.new_dns_button, 2, 6, 1, 1)
@@ -80,9 +84,13 @@ class Ui_MainWindow(object):
         self.new_ip_button = QtWidgets.QPushButton(self.frame_3)
         self.new_ip_button.setObjectName("new_ip_button")
         self.gridLayout_4.addWidget(self.new_ip_button, 2, 4, 1, 1)
-        spacerItem2 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        spacerItem2 = QtWidgets.QSpacerItem(
+            40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum
+        )
         self.gridLayout_4.addItem(spacerItem2, 1, 3, 1, 1)
-        spacerItem3 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        spacerItem3 = QtWidgets.QSpacerItem(
+            40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum
+        )
         self.gridLayout_4.addItem(spacerItem3, 2, 3, 1, 1)
         self.new_tcp_button = QtWidgets.QPushButton(self.frame_3)
         self.new_tcp_button.setObjectName("new_tcp_button")
@@ -105,11 +113,13 @@ class Ui_MainWindow(object):
         self.tree_sync_button.setText(_translate("MainWindow", "Sync From Tree"))
         self.new_sniff_button.setText(_translate("MainWindow", "sniffer"))
         self.new_icmp_button.setText(_translate("MainWindow", "ICMP"))
-        self.editor_sync_button.setText(_translate("MainWindow", "Sync From Editor"))
+        self.run_button.setText(_translate("MainWindow", "Save and Run"))
         self.new_dns_button.setText(_translate("MainWindow", "DNS"))
         self.new_spoof_button.setText(_translate("MainWindow", "sender"))
         self.new_ethernet_button.setText(_translate("MainWindow", "Ethernet"))
         self.new_ip_button.setText(_translate("MainWindow", "IP"))
         self.new_tcp_button.setText(_translate("MainWindow", "TCP"))
         self.new_udp_button.setText(_translate("MainWindow", "UDP"))
+
+
 from PyQt5 import Qsci
