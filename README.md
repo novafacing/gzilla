@@ -16,3 +16,11 @@ A visual packet spoofing tool
 ### Lab 2:
 - Attacker: `python3 gzilla/gzilla.py tests/lab2/dns_cache_poisoning.yaml`
 - Apollo: `rndc dumpdb -cache && sleep 1 && cat /var/cache/bind/dump.db | grep ns.dnslabattacker.net`
+
+## Installing requirements
+
+`python3 -m pip install -r requirements.txt`
+
+## Running the GUI
+
+`python3 gzilla/main.py` 
